@@ -28,6 +28,35 @@ exports.summary = functions.https.onRequest((request, response) => {
   });
 });
 
+exports.result = functions.https.onRequest((request, response) => {
+    let cinemaId = request.query.cinemaId;
+    admin.database().ref("/vote/" + cinemaId).once('value')
+    .then(result => {
+      let voteResult = 'a'
+      let tmpkey = 0
+      for (branchkey in result)
+      {
+        tmpkey = branchkey
+        break;
+      }
+      response.send(tmpkey);
+    })
+    .catch(error => {
+      response.status(404).send({ message: 'Not Found' })
+    });
+  });
+
+exports.initialize = functions.https.onRequest((request, response) => {
+    let branchId = request.query.branchId;
+    admin.database().ref("/vote/cinema_id_a/branch_id/" + branchId).remove()
+    .then(result => {
+      response.send(result);
+    })
+    .catch(error => {
+      response.status(404).send({ message: 'Not Found' })
+    });
+});
+
 exports.helloWorld = functions.https.onRequest((request, response) => {
  response.send("Hello from FGO!");
 });
