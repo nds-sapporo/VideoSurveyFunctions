@@ -64,17 +64,20 @@ exports.result = functions.https.onRequest((request, response) => {
   });
   
 exports.initialize = functions.https.onRequest((request, response) => {
-    let branchId = request.query.branchId;
-    admin.database().ref("/vote/cinema_id_a/branch_id/" + branchId).remove()
+    let status = 'stop';
+    admin.database().ref("/vote/").once('value')
     .then(result => {
-      admin.database().ref("/vote/cinema_id_a/branch_id/" + branchId).push()
-      response.send(result);
+      result.forEach(cinema => {
+        let cinemaId = cinema.key;
+        admin.database().ref("/cinema/" + cinemaId ).set({
+          status: status
+        });
+        admin.database().ref("/vote/" + cinemaId + "/branch_id/").remove();
+      });
+    
+      response.send({ initialize: 'OK' })
     })
     .catch(error => {
       response.status(404).send({ message: 'Not Found' })
     });
-});
-
-exports.helloWorld = functions.https.onRequest((request, response) => {
- response.send("Hello from FGO!");
 });
