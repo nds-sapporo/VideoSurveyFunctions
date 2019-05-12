@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
-const cors = require('cors');
+const cors = require('cors')({origin: true});
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -72,14 +72,32 @@ exports.result = functions.https.onRequest((request, response) => {
   
 exports.initialize = functions.https.onRequest((request, response) => {
   cors(request, response, () => {
-    let status = 'stop';
+    admin.database().ref("/cinema/cinema_id_a" ).set({
+      status: 'stop'
+    });
+    admin.database().ref("/cinema/cinema_id_b" ).set({
+      status: 'stop'
+    });
+    admin.database().ref("/cinema/cinema_id_c" ).set({
+      status: 'stop'
+    });
+    admin.database().ref("/cinema/cinema_id_d" ).set({
+      status: 'stop'
+    });
+    admin.database().ref("/cinema/cinema_id_e" ).set({
+      status: 'stop'
+    });
+    admin.database().ref("/cinema/cinema_id_f" ).set({
+      status: 'stop'
+    });
+    admin.database().ref("/cinema/cinema_id_g" ).set({
+      status: 'stop'
+    });
+
     admin.database().ref("/vote/").once('value')
     .then(result => {
       result.forEach(cinema => {
         let cinemaId = cinema.key;
-        admin.database().ref("/cinema/" + cinemaId ).set({
-          status: status
-        });
         admin.database().ref("/vote/" + cinemaId + "/branch_id/").remove();
       });
     
