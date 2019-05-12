@@ -1,34 +1,40 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
+const cors = require('cors');
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 exports.putStatus = functions.https.onRequest((request, response) => {
-  if (request.method !== 'PUT') {
-    response.status(405).send('Method Not Allowed');
-    return;
-  }
-  let cinemaId = request.body.cinemaId;
-  let status = request.body.status;
-  admin.database().ref("/cinema/" + cinemaId).set({
-    status: status
+  cors(request, response, () => {
+    if (request.method !== 'PUT') {
+      response.status(405).send('Method Not Allowed');
+      return;
+    }
+    let cinemaId = request.body.cinemaId;
+    let status = request.body.status;
+    admin.database().ref("/cinema/" + cinemaId).set({
+      status: status
+    });
+    response.send("OK");
   });
-  response.send("OK");
 });
 
 exports.summary = functions.https.onRequest((request, response) => {
-  let cinemaId = request.query.cinemaId;
-  admin.database().ref("/vote/" + cinemaId).once('value')
-  .then(result => {
-    response.send(result);
-  })
-  .catch(error => {
-    response.status(404).send({ message: 'Not Found' })
+  cors(request, response, () => {
+    let cinemaId = request.query.cinemaId;
+    admin.database().ref("/vote/" + cinemaId).once('value')
+    .then(result => {
+      response.send(result);
+    })
+    .catch(error => {
+      response.status(404).send({ message: 'Not Found' })
+    });
   });
 });
 
 exports.result = functions.https.onRequest((request, response) => {
+  cors(request, response, () => {
     let cinemaId = request.query.cinemaId;
     admin.database().ref("/vote/" + cinemaId).once('value')
     .then(result => {
@@ -62,8 +68,10 @@ exports.result = functions.https.onRequest((request, response) => {
       response.status(404).send({ message: 'Not Found' })
     });
   });
+});
   
 exports.initialize = functions.https.onRequest((request, response) => {
+  cors(request, response, () => {
     let status = 'stop';
     admin.database().ref("/vote/").once('value')
     .then(result => {
@@ -80,4 +88,5 @@ exports.initialize = functions.https.onRequest((request, response) => {
     .catch(error => {
       response.status(404).send({ message: 'Not Found' })
     });
+  });
 });
