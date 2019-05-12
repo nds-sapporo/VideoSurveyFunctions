@@ -32,24 +32,42 @@ exports.result = functions.https.onRequest((request, response) => {
     let cinemaId = request.query.cinemaId;
     admin.database().ref("/vote/" + cinemaId).once('value')
     .then(result => {
+      let tmpkey = 0;
+      let sum = {};
+      result.forEach(branch => {
+        branch.forEach(choice => {
+          let choiseValue = choice.key;
+          sum[choiseValue] = 0;
+          choice.forEach(item => {
+            let m = item.child("money").val();
+            sum[choiseValue] += m;
+          });
+        });
+      });
+      let tmpTotalValue = 0;
       let voteResult = 'a'
-      let tmpkey = 0
-      for (branchkey in result)
+      for (key in sum)
       {
-        tmpkey = branchkey
-        break;
+        if (tmpTotalValue < sum[key])
+        {
+          tmpTotalValue = sum[key];
+          voteResult = key;
+        }
       }
-      response.send(tmpkey);
+      response.send({result: voteResult});
+      //response.send(sum);
+
     })
     .catch(error => {
       response.status(404).send({ message: 'Not Found' })
     });
   });
-
+  
 exports.initialize = functions.https.onRequest((request, response) => {
     let branchId = request.query.branchId;
     admin.database().ref("/vote/cinema_id_a/branch_id/" + branchId).remove()
     .then(result => {
+      admin.database().ref("/vote/cinema_id_a/branch_id/" + branchId).push()
       response.send(result);
     })
     .catch(error => {
